@@ -1,0 +1,203 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id             String    @id @default(uuid()) @db.Uuid
+  fisrtName      String
+  lastName       String
+  email          String    @unique
+  passwordHash   String
+  identityNumber String    @unique
+  isActive       Boolean   @default(true)
+  phone          String    @unique
+  profile        Profile   @relation(fields: [profileId], references: [id])
+  profileId      String    @db.Uuid
+  isRoot         Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
+  deletedAt      DateTime?
+
+  especialityAdmins  Especiality_admin[]
+  schedulings        Scheduling[]
+  daysOfMedicalCares DaysOfMedicalCare[]
+  procedures         Procedure[]
+}
+
+model DaysOfMedicalCare {
+  id       String @id @default(uuid()) @db.Uuid
+  doctorId String @db.Uuid
+  admin    Admin  @relation(fields: [doctorId], references: [id])
+
+  serviceDayId String      @db.Uuid
+  serviceDays  ServiceDays @relation(fields: [serviceDayId], references: [id])
+}
+
+model ServiceDays {
+  id                 String              @id @default(uuid()) @db.Uuid
+  name               String
+  label              String
+  daysOfMedicalCares DaysOfMedicalCare[]
+}
+
+model Profile {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @unique
+  label       String       @default("---")
+  description String?
+  admin       Admin[]
+  permissions Permission[] @relation("ProfilePermissions")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime?    @updatedAt
+  deletedAt   DateTime?
+}
+
+model Permission {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique
+  label     String    @default("---")
+  profiles  Profile[] @relation("ProfilePermissions")
+  deletedAt DateTime?
+}
+
+model Especiality_admin {
+  id            String      @id @default(uuid()) @db.Uuid
+  admin         Admin       @relation(fields: [adminId], references: [id])
+  adminId       String      @db.Uuid
+  especiality   Especiality @relation(fields: [especialityId], references: [id])
+  especialityId String      @db.Uuid
+}
+
+model Especiality {
+  id                String              @id @default(uuid()) @db.Uuid
+  name              String              @unique
+  label             String              @default("---")
+  description       String?
+  updatedAt         DateTime?           @updatedAt
+  deletedAt         DateTime?
+  especialityAdmins Especiality_admin[]
+}
+
+model Patient {
+  id             String       @id @default(uuid()) @db.Uuid
+  fisrtName      String
+  lastName       String
+  birthDay       String
+  email          String       @unique()
+  identityNumber String       @unique
+  isActive       Boolean      @default(true)
+  phone          String       @unique
+  updatedAt      DateTime?    @updatedAt
+  deletedAt      DateTime?
+  schedulings    Scheduling[]
+}
+
+model Scheduling {
+  id            String         @id @default(uuid()) @db.Uuid
+  hours         String
+  patientId     String         @db.Uuid
+  patient       Patient        @relation(fields: [patientId], references: [id])
+  doctorId      String         @db.Uuid
+  admin         Admin          @relation(fields: [doctorId], references: [id])
+  type          String
+  status        String
+  observation   String
+  phone         String
+  consultations Consultation[]
+}
+
+model Consultation {
+  id             String          @id @default(uuid()) @db.Uuid
+  schedulingId   String          @unique
+  scheduling     Scheduling      @relation(fields: [schedulingId], references: [id])
+  medicalHistory MedicalHistory?
+
+  medicines Medicines[]
+  exames    Exames?
+  procedure Procedure?
+}
+
+model MedicalHistory {
+  id          String @id @default(uuid()) @db.Uuid
+  description String
+
+  consultationId String       @unique
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+  updatedAt      DateTime?    @updatedAt
+  deletedAt      DateTime?
+}
+
+model Medicines {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String
+  description String
+
+  consultationId String       @unique
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+  updatedAt      DateTime?    @updatedAt
+  deletedAt      DateTime?
+}
+
+model Exames {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  description String
+  file        String?
+
+  consultationId String       @unique
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+  updatedAt      DateTime?    @updatedAt
+  deletedAt      DateTime?
+}
+
+model Procedure {
+  id             String  @id @default(uuid()) @db.Uuid
+  name           String
+  description    String
+  doctorId       String? @db.Uuid
+  admin          Admin?  @relation(fields: [doctorId], references: [id])
+  consultationId String  @unique
+
+  consultation Consultation @relation(fields: [consultationId], references: [id])
+  updatedAt    DateTime?    @updatedAt
+  deletedAt    DateTime?
+}
+
+// fornecedor
+model Supplier {
+  id             String    @id @default(uuid()) @db.Uuid
+  name           String
+  email          String    @unique()
+  identityNumber String    @unique
+  isActive       Boolean   @default(true)
+  phone          String    @unique
+  updatedAt      DateTime? @updatedAt
+  deletedAt      DateTime?
+  stocks         Stock[]
+}
+
+model Category {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  label     String
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  stocks    Stock[]
+}
+
+model Stock {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  supplierId String   @db.Uuid
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+  categoryId String    @db.Uuid
+  category   Category  @relation(fields: [categoryId], references: [id])
+  quantity   Float
+  updatedAt  DateTime? @updatedAt
+  deletedAt  DateTime?
+}
