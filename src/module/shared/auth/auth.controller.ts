@@ -1,8 +1,9 @@
-import { Controller, Post, Body, Res, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Res, BadRequestException, Get, UseGuards, Req } from '@nestjs/common';
 import { type Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Autenticação')
 @Controller('auth')
@@ -24,12 +25,20 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 15, // 15 minutos
+      maxAge: 1000 * 60 * 15, 
     });
 
     return { message: 'Login bem-sucedido', user: userData };
   }
+  @ApiBearerAuth('JWT-auth') 
+  @UseGuards(JwtAuthGuard)
+  @Get('current-user')
+   getAuthenticatedUser(@Req() req: any) {
+    return req.user;
+  }
 
+  @ApiBearerAuth('JWT-auth') 
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
   @ApiOperation({ summary: 'Remove o cookie de autenticação JWT.' })
   @ApiResponse({ status: 200, description: 'Logout realizado com sucesso.' })
@@ -37,4 +46,6 @@ export class AuthController {
     res.clearCookie('access_token');
     return { message: 'Logout realizado com sucesso' };
   }
+
+
 }
