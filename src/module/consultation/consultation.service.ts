@@ -22,6 +22,8 @@ export class ConsultationService {
     const scheduling = await this.prisma.scheduling.findUnique({
       where: { id: dto.schedulingId },
     });
+  
+    
 
     if (!scheduling || scheduling.deletedAt) {
       throw new BadRequestException('Agendamento inválido');
