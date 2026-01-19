@@ -18,4 +18,13 @@ export const profilesData: Profile[] = [
       "full.access", 
     ],
   },
+    {
+    id: "profile_doctors",
+    name: "Doctor",
+    label: "Doctor",
+    description: "Acesso ao sistema .",
+    permissions: [
+      "full.access", 
+    ],
+  },
 ];

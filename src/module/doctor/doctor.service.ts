@@ -23,8 +23,8 @@ export class DoctorService {
   /**
    * Cria um novo médico
    */
-  async create(createDoctorDto: CreateDoctorDto, creatorId: string) {
-    // 1. Verifica se quem está criando tem permissão (exemplo: admin ou root)
+  async create(createDoctorDto: CreateDoctorDto) {
+    /*1. Verifica se quem está criando tem permissão (exemplo: admin ou root)
     const creator = await this.prisma.admin.findUnique({
       where: { id: creatorId },
     });
@@ -37,6 +37,7 @@ export class DoctorService {
       throw new ForbiddenException('Sem permissão para criar médicos');
     }
 
+      */
     // 2. Verifica duplicidade de campos únicos
     const existing = await this.prisma.admin.findFirst({
       where: {
@@ -217,7 +218,7 @@ export class DoctorService {
   /**
    * Soft-delete (marca como deletado)
    */
-  async remove(id: string, deleterId: string) {
+  async remove(id: string, deleterId?: string) {
     const doctor = await this.prisma.admin.findUnique({
       where: { id },
     });

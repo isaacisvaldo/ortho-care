@@ -24,17 +24,18 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../shared/auth/guards/jwt-auth.guard';
+import { CategoryService } from './category.service';
 
 @ApiTags('Stock / Inventário')
 @Controller('stocks')
 export class StockController {
-  constructor(private readonly stockService: StockService) {}
+  constructor(private readonly stockService: StockService, private readonly categoryService:CategoryService) {}
 
   /**
    * Cria um novo item no stock/inventário
    */
   @Post()
-  @UseGuards(JwtAuthGuard)
+ // @UseGuards(JwtAuthGuard)
   // @Roles(Role.ADMIN, Role.INVENTORY_MANAGER) // descomente se tiveres roles
   @ApiOperation({ summary: 'Cria um novo item de stock' })
   async create(@Body() createStockDto: CreateStockDto, @Request() req) {
@@ -46,7 +47,7 @@ export class StockController {
    * Lista paginada de itens de stock (para tabelas administrativas)
    */
   @Get()
-  @UseGuards(JwtAuthGuard)
+ // @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Lista paginada de itens de stock com filtros' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -62,12 +63,15 @@ export class StockController {
   ) {
     return this.stockService.findAll(query);
   }
-
+    @Get("category")
+  findForDropdown() {
+    return this.categoryService.findAllForDropdown();
+  }
   /**
    * Busca um item específico de stock
    */
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+ // @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtém detalhes de um item de stock específico' })
   async findOne(@Param('id') id: string) {
     return this.stockService.findOne(id);
@@ -77,7 +81,7 @@ export class StockController {
    * Atualiza um item de stock
    */
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+ // @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Atualiza informações de um item de stock' })
   async update(
     @Param('id') id: string,
@@ -93,7 +97,7 @@ export class StockController {
    */
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
+ // @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Remove (arquiva) um item de stock' })
   async remove(@Param('id') id: string, @Request() req) {
     const deletedBy = req.user?.sub;
@@ -105,7 +109,7 @@ export class StockController {
    * (ideal para formulários de entrada/saída de stock)
    */
   @Get('simple')
-  @UseGuards(JwtAuthGuard)
+ // @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Lista leve de itens de stock para selects/dropdowns',
     description: 'Retorna apenas ID, nome e quantidade atual. Útil para formulários.',
@@ -127,4 +131,6 @@ export class StockController {
       take: 100, // limite máximo para evitar sobrecarga
     });
   }
+
+
 }

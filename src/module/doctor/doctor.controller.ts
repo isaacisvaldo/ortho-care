@@ -26,14 +26,14 @@ export class DoctorController {
   constructor(private readonly doctorService: DoctorService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  
   async create(@Body() createDoctorDto: CreateDoctorDto, @Request() req) {
-    const creatorId = req.user.sub; 
-    return this.doctorService.create(createDoctorDto, creatorId);
+    
+    return this.doctorService.create(createDoctorDto);
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  
   async findAll(
     @Query() findAllQuery: FindAllDto ,
   ) {
@@ -46,7 +46,7 @@ export class DoctorController {
  * Retorna apenas campos essenciais: id, nome completo, especialidade (se disponível)
  */
 @Get('simple')
-@UseGuards(JwtAuthGuard)
+
 @ApiOperation({
   summary: 'Lista leve de médicos para dropdowns e selects',
   description: 'Retorna lista simplificada de médicos ativos. Ideal para campos de seleção/autocomplete.'
@@ -68,13 +68,13 @@ async getDoctorsForSelect(
   });
 }
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  
   async findOne(@Param('id') id: string) {
     return this.doctorService.findOne(id);
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard) 
+   
   async update(
     @Param('id') id: string,
     @Body() updateDoctorDto: UpdateDoctorDto,
@@ -86,14 +86,14 @@ async getDoctorsForSelect(
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
+  
   async remove(@Param('id') id: string, @Request() req) {
-    const deleterId = req.user.sub;
-    return this.doctorService.remove(id, deleterId);
+    
+    return this.doctorService.remove(id);
   }
 
   @Patch(':id/restore')
-  @UseGuards(JwtAuthGuard)
+  
 
   async restore(@Param('id') id: string, @Request() req) {
     const userId = req.user.sub;

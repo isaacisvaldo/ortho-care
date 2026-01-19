@@ -24,64 +24,27 @@ import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
-  /**
-   * Cria um novo paciente
-   */
   @Post()
-  //@UseGuards(JwtAuthGuard)
   async create(@Body() createPatientDto: CreatePatientDto, @Request() req) {
-    const createdBy = req.user?.sub; // ID do usuário autenticado (ajuste conforme sua estratégia JWT)
+    const createdBy = req.user?.sub;
     return this.patientService.create(createPatientDto, createdBy);
   }
-@Get('simple')
 
-  @ApiOperation({
-    summary: 'Lista leve de pacientes para dropdowns e selects',
-    description: 'Retorna lista simplificada de pacientes ativos. Ideal para campos de seleção/autocomplete.'
-  })
-  @ApiQuery({
-    name: 'search',
-    required: false,
-    type: String,
-    description: 'Busca parcial por nome ou sobrenome (opcional)',
-    example: 'João Silva'
-  })
-  async getPatientsForSelect(
-    @Query('search') search?: string,
-  ) {
+  @Get('simple')
+  async getPatientsForSelect(@Query('search') search?: string) {
     return this.patientService.findAllSimple({
       search,
-      onlyActive: true,           // quase sempre queremos apenas pacientes ativos em dropdowns
-      take: 100,                  // limite máximo para evitar sobrecarga (ajuste conforme necessidade)
+      onlyActive: true,
+      take: 100,
     });
   }
-  /**
-   * Lista paginada de pacientes (para telas administrativas/clínicas)
-   */
-  @Get()
-  //@UseGuards(JwtAuthGuard)
-  async findAll(
-    @Query() findAllQuery: FindAllDto 
-  ) {
-  
 
+  @Get()
+  async findAll(@Query() findAllQuery: FindAllDto) {
     return this.patientService.findAll(findAllQuery);
   }
 
-  /**
-   * Busca um paciente específico pelo ID
-   */
-  @Get(':id')
- // @UseGuards(JwtAuthGuard)
-  async findOne(@Param('id') id: string) {
-    return this.patientService.findOne(id);
-  }
-
-  /**
-   * Atualiza dados do paciente
-   */
   @Patch(':id')
-  //@UseGuards(JwtAuthGuard) 
   async update(
     @Param('id') id: string,
     @Body() updatePatientDto: UpdatePatientDto,
@@ -91,15 +54,15 @@ export class PatientController {
     return this.patientService.update(id, updatePatientDto, updatedBy);
   }
 
-  /**
-   * Remove (soft-delete) um paciente
-   */
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  //@UseGuards(JwtAuthGuard) 
   async remove(@Param('id') id: string, @Request() req) {
     const deletedBy = req.user?.sub;
     return this.patientService.remove(id, deletedBy);
   }
 
+  @Get(':id') // sempre a última rota GET
+  async findOne(@Param('id') id: string) {
+    return this.patientService.findOne(id);
+  }
 }

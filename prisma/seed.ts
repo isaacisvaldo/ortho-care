@@ -3,6 +3,7 @@ import { internalPermissions } from './seeds/permission.seed';
 import * as bcrypt from 'bcrypt';
 import { profilesData } from './seeds/perfil.seed';
 import { PrismaClient } from '@prisma/client';
+import { internalCategory } from './seeds/category.seed';
 
 
 const prisma = new PrismaClient({} as any);
@@ -45,7 +46,10 @@ async function main() {
   }
   console.log('Perfis criados com sucesso!');
 
-
+await prisma.category.createMany({
+  data: internalCategory,
+  skipDuplicates: true,
+});
 
   // --- SEED: ADMIN PADRÃO ---
   const defaultEmail = (process.env.DEFAULT_ADMIN_EMAIL || 'isaac.bunga@outlook.com').trim();
